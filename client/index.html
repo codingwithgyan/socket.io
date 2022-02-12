@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script
+      src="https://cdn.socket.io/4.4.1/socket.io.min.js"
+      integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H"
+      crossorigin="anonymous"
+    ></script>
+    <title>Chat app</title>
+  </head>
+  <body>
+    <input type="text" name="username" id="username" placeholder="username" />
+    <input type="text" name="message" id="message" placeholder="message" />
+    <button onclick="fn()">Send</button>
+    <h4 id="notification" style="float: right">hello</h4>
+    <p id="showChat"></p>
+  </body>
+  <script>
+    let socket = io("ws://localhost:8080");
+    let showChat = document.getElementById("showChat");
+    let notification = document.getElementById("notification");
+    socket.on("connect", () => {
+      console.log(socket.id);
+    });
+
+    socket.on("user_message", async function (event) {
+      showChat.append(event.username + " : " + event.message);
+      showChat.append(document.createElement("br"));
+    });
+
+    socket.on("new_user", async function (data) {
+      notification.innerHTML = data.message + " : " + data.id;
+    });
+
+    function fn() {
+      //   alert();
+      if (socket.connected) {
+        let username = document.getElementById("username").value;
+        let message = document.getElementById("message").value;
+        socket.emit("message", {
+          id: socket.id,
+          username: username,
+          message: message,
+        });
+      }
+    }
+  </script>
+</html>
